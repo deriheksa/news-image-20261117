@@ -23,6 +23,7 @@ RED = (176, 58, 46)
 INK = (34, 34, 34)
 GREY = (90, 86, 78)
 CARD = (255, 255, 255)
+HERO_BG = (183, 200, 232)  # #B7C8E8 — map legend light blue (digest script)
 BORDER = (216, 210, 196)
 SKY = (188, 216, 232)
 SEA = (61, 126, 166)
@@ -440,7 +441,7 @@ def build():
     iw = 140  # illustration width (full card height)
     for i, (kicker, head, summ) in enumerate(HEROES):
         x = 16 + i * (hw + gap)
-        d.rectangle([x, hy, x + hw, hy + hh], fill=CARD, outline=BORDER, width=1)
+        d.rectangle([x, hy, x + hw, hy + hh], fill=HERO_BG, outline=BORDER, width=1)
         HERO_DRAW[i](d, x + 1, hy + 1, iw, hh - 2)
         tx = x + iw + 10
         tw = hw - iw - 20  # 160
