@@ -236,7 +236,7 @@ GRID_COL = {
     "AFRICA \u00b7 HEALTH": (C_SOC, T_SOC),
     "AMERICAS \u00b7 HEALTH": (C_SOC, T_SOC),
     "SPACE \u00b7 UPDATE": (C_ECO, T_ECO),
-    "CLIMATE \u00b7 COP31": (C_POL, T_POL),
+    "CLIMATE \u00b7 COP31": (C_DIP, T_DIP),
     "EUROPE \u00b7 POLITICS": (C_POL, T_POL),
     "ASIA \u00b7 POLITICS": (C_POL, T_POL),
     "EUROPE \u00b7 PROTEST": (C_SOC, T_SOC),
@@ -373,12 +373,12 @@ PINS = [(1, 36.5, 45.3, C_WAR), (2, 50.5, 26.2, C_WAR),
         (3, 114.1, 22.5, C_DIP), (4, 121.0, 14.6, C_DIP),
         (5, 59.5, 24.0, C_ECO), (6, -121.9, 37.4, C_ECO),
         (7, 23.0, -3.0, C_SOC), (8, -100.0, 39.0, C_SOC),
-        (9, -80.5, 28.4, C_ECO), (10, 30.7, 36.9, C_POL),
+        (9, -80.5, 28.4, C_ECO), (10, 30.7, 36.9, C_DIP),
         (11, 22.5, 45.2, C_POL), (12, 106.9, 47.9, C_POL),
         (13, 2.35, 48.85, C_SOC), (14, 12.5, 41.0, C_SOC),
         (15, 140.0, 38.0, C_WAR)]
 # small dots for briefs locations: (lon, lat, colour)
-BDOTS = [(51.4, 35.7, C_WAR), (30.1, -1.9, C_SOC), (-75.7, 45.4, C_DIP),
+BDOTS = [(51.4, 35.7, C_WAR), (30.1, -1.9, C_SOC), (-75.7, 45.4, C_ECO),
          (127.0, 37.5, C_ECO), (13.4, 52.5, C_GREY), (38.9, 15.3, C_SOC)]
 # arcs between genuinely linked locations: (lon1, lat1, lon2, lat2, colour, lift, side)
 # side = sideways bulge as a fraction of the segment length (perpendicular);
