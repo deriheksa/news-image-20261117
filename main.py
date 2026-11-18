@@ -3,8 +3,9 @@
 
 Same 35-story front page as v2, but the "WHERE IT HAPPENED" section is now
 the dark dotted world map from the user's digest model: dark panel, dotted
-continents, bezier arcs between linked locations, numbered category pins
-(stories 1-15), small dots for briefs locations, category legend inside.
+continents, bezier arcs between linked locations, solid category dots
+(stories 1-15, colour only, no numbers), small dots for briefs locations,
+category legend inside.
 Stdlib + Pillow only, no network, deterministic.
 Writes /output/entry.png (JPEG bytes, magic decides the format).
 """
@@ -502,17 +503,14 @@ def build():
     for lo, la, col in BDOTS:
         dot(px(lo, la), col)
 
-    def pin(p, n, col, r=9):
+    def pin(p, col, r=9):
         d.ellipse([p[0] - r - 4, p[1] - r - 4, p[0] + r + 4, p[1] + r + 4],
                   fill=mix(PANEL, col, 0.28))
         d.ellipse([p[0] - r, p[1] - r, p[0] + r, p[1] + r], fill=col,
                   outline=(255, 255, 255), width=2)
-        nf = F_TITLE(11)
-        s = str(n)
-        d.text((p[0] - nf.getlength(s) / 2, p[1] - 6), s, font=nf, fill=PIN_INK)
 
     for n, lo, la, col in PINS:
-        pin(px(lo, la), n, col)
+        pin(px(lo, la), col)
     sx, sy = px(114.1, 22.5)
     lab = "Shenzhen"
     lf2 = F_TITLE(11)
