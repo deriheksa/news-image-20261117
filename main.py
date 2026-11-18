@@ -193,7 +193,7 @@ GRID = [
     ("ASIA · POLITICS", "Mongolia\u2019s president says he will resign",
      "Denies unproven $25m bribery claim."),
     ("EUROPE · PROTEST", "146,000 march in France over pay",
-     "Unions claim 500,000+. Power down 16%."),
+     "Unions claim 500,000+."),
     ("VATICAN · FAITH", "Pope Leo XIV back in Rome after 12-day tour",
      "Says lung tumour \u2018entirely contained\u2019."),
     ("ASIA · DEFENCE", "Japan scrambles jets as Russian planes breach airspace",
