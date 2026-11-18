@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""News front page v6 for make.fun bounty news-image-20261117.
+"""News front page v8 for make.fun bounty news-image-20261117.
 
 Same 35-story front page as v2, but the "WHERE IT HAPPENED" section is now
 the dark dotted world map from the user's digest model: dark panel, dotted
@@ -7,6 +7,8 @@ continents, bezier arcs between linked locations, category dots
 (stories 1-3 plain, stories 4-15 numbered), small dots for briefs locations,
 category legend inside. The grid story-number circles and REGION . BEAT
 labels are coloured by category (bright circle, darker tint for the label).
+All number text is dark ink, per the digest. The briefs list uses coloured
+dots (no numbers), like the digest.
 Stdlib + Pillow only, no network, deterministic.
 Writes /output/entry.png (JPEG bytes, magic decides the format).
 """
@@ -265,6 +267,11 @@ BRIEFS = [
     "UN Geneva talks on banning killer robots, day 2",
     "Brent $91.67; gold up 0.63%; euro below $1.10",
 ]
+
+# category colour per brief (stories 16-35), matching the map legend
+BRIEF_COLS = [C_WAR, C_POL, C_WAR, C_SOC, C_ECO, C_SOC, C_ECO, C_POL,
+              C_ECO, C_ECO, C_SOC, C_ECO, C_GREY, C_GREY, C_GREY,
+              C_ECO, C_ECO, C_ECO, C_DIP, C_ECO]
 
 # ---------------------------------------------------------------- map
 # Coarse continent outlines as (lon, lat), written from geographic
@@ -550,17 +557,17 @@ def build():
     by = 854
     text(d, (16, by), "ALSO ON TUESDAY 17 NOVEMBER", F_TITLE(16), NAVY)
     d.rectangle([316, by + 9, W - 16, by + 11], fill=RED)
-    bf, bnf = F_BODY(12), F_TITLE(12)
+    bf = F_BODY(12)
     for i, b in enumerate(BRIEFS):
         col, row = divmod(i, 10)
         x = 16 + col * 496
         y = 870 + row * 11
-        num = "%d." % (i + 16)
-        text(d, (x, y), num, bnf, RED)
-        bx = x + bnf.getlength(num) + 4
+        # coloured dot only, no number (like the user's digest file)
+        d.ellipse([x, y + 1, x + 8, y + 9], fill=BRIEF_COLS[i])
+        bx = x + 14
         s = b
-        if bf.getlength(s) > 496 - (bx - x) - 4:
-            while bf.getlength(s) > 496 - (bx - x) - 4 and len(s) > 20:
+        if bf.getlength(s) > 496 - 14 - 4:
+            while bf.getlength(s) > 496 - 14 - 4 and len(s) > 20:
                 s = s[:-4] + "..."
             truncated.append("brief %d" % (i + 16))
         text(d, (bx, y), s, bf, INK)
