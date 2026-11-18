@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""News front page v13 for make.fun bounty news-image-20261117.
+"""News front page v15 for make.fun bounty news-image-20261117.
 
-Same 35-story front page as v12, but the 3 hero illustrations are redrawn
-for the tall portrait panel (140x158): a single bridge tower with the span
-dropping into the strait, a radar scope with sweeping beam and drone blips
-(replacing the dome + X drones), and the three summit flags above a skyline
-that fills the panel to the bottom edge. Layout, text, kicker accents
-(war dark red, diplomacy dark gold) and everything below the heroes are
-unchanged.
+Same 35-story front page as v14, but the hero 3 illustration is redrawn:
+three vertical summit banners (China red+stars, USA stripes+canton,
+Russia white/blue/red) hanging from a bar above a small skyline,
+replacing the flags-on-poles model that looked weird. Hero 1 (bridge)
+and hero 2 (radar scope) are unchanged. Layout, text, kicker accents
+(war dark red, diplomacy dark gold), hero light-blue backgrounds
+(#B7C8E8) and everything below the heroes are unchanged.
 Stdlib + Pillow only, no network, deterministic.
 Writes /output/entry.png (JPEG bytes, magic decides the format).
 """
@@ -188,39 +188,54 @@ def draw_radar(d, x, y, w, h):
 
 
 def draw_summit(d, x, y, w, h):
-    # Portrait panel: three flags on poles above a skyline that fills
-    # the panel to the bottom edge. (v12's skyline stopped at y+104 and
-    # left a dead flat green block below; the concept itself reads fine.)
+    # Portrait panel: three vertical summit banners hanging side by side
+    # from a horizontal bar, one per country (CN / US / RU flag patterns).
+    # (v13's flags-on-poles model looked weird; banners replace it.)
+    def star(cx, cy, r, fill):
+        pts = []
+        for k in range(10):
+            ang = -math.pi / 2 + k * math.pi / 5
+            rr = r if k % 2 == 0 else r * 0.42
+            pts.append((cx + rr * math.cos(ang), cy + rr * math.sin(ang)))
+        d.polygon(pts, fill=fill)
+
     d.rectangle([x, y, x + w, y + h], fill=(223, 233, 242))
-    # skyline: buildings rise from the bottom edge, varying heights
-    for bx, bw, top in ((x + 2, 20, 78), (x + 26, 18, 58), (x + 48, 24, 88),
-                        (x + 76, 18, 48), (x + 98, 20, 68), (x + 122, 16, 84)):
+    # small dark skyline along the bottom edge to anchor the composition
+    for bx, bw, top in ((x + 2, 18, 138), (x + 24, 16, 128), (x + 44, 20, 144),
+                        (x + 68, 16, 132), (x + 88, 20, 140), (x + 112, 18, 136)):
         d.rectangle([bx, y + top, bx + bw, y + h], fill=(120, 138, 158))
-        for wy in range(y + top + 6, y + h - 4, 9):
-            for wx in range(bx + 5, bx + bw - 4, 10):
-                d.rectangle([wx, wy, wx + 4, wy + 5], fill=(232, 182, 76))
-    # three flags on poles, in front of the skyline
-    for px, code in ((x + 12, "CN"), (x + 56, "US"), (x + 100, "RU")):
-        d.rectangle([px, y + 8, px + 3, y + 72], fill=(60, 60, 60))
-        fx, fy = px + 3, y + 8
-        if code == "CN":
-            d.rectangle([fx, fy, fx + 32, fy + 15], fill=(222, 41, 16))
-            for sx, sy in ((fx + 6, fy + 3), (fx + 13, fy + 2), (fx + 11, fy + 7),
-                           (fx + 17, fy + 6), (fx + 14, fy + 10)):
-                d.ellipse([sx, sy, sx + 3, sy + 3], fill=(255, 222, 0))
-        elif code == "US":
-            d.rectangle([fx, fy, fx + 32, fy + 15], fill=(255, 255, 255))
-            for i, yy in enumerate((0, 5, 10)):
-                d.rectangle([fx, fy + yy, fx + 32, fy + yy + 2],
-                            fill=(178, 34, 52))
-            d.rectangle([fx, fy, fx + 14, fy + 8], fill=(60, 59, 110))
-            for sx in range(fx + 3, fx + 13, 4):
-                for sy in range(fy + 2, fy + 7, 3):
-                    d.ellipse([sx, sy, sx + 2, sy + 2], fill=(255, 255, 255))
-        else:
-            d.rectangle([fx, fy, fx + 32, fy + 5], fill=(255, 255, 255))
-            d.rectangle([fx, fy + 5, fx + 32, fy + 10], fill=(0, 57, 166))
-            d.rectangle([fx, fy + 10, fx + 32, fy + 15], fill=(213, 0, 50))
+        for wy in range(y + top + 5, y + h - 4, 8):
+            for wx in range(bx + 4, bx + bw - 3, 8):
+                d.rectangle([wx, wy, wx + 3, wy + 4], fill=(232, 182, 76))
+    # hanging bar with round finials
+    d.rectangle([x + 2, y + 8, x + w - 2, y + 12], fill=(60, 60, 60))
+    d.ellipse([x, y + 6, x + 6, y + 14], fill=(60, 60, 60))
+    d.ellipse([x + w - 6, y + 6, x + w, y + 14], fill=(60, 60, 60))
+    # three banners: 40 wide, 6 gap, top y+12, bottom y+124
+    bw = 40
+    top, bot = y + 12, y + 124
+    # --- China: red, one big star + four small stars at top
+    bx = x + 4
+    d.rectangle([bx, top, bx + bw, bot], fill=(222, 41, 16))
+    star(bx + 12, top + 15, 9, (255, 222, 0))
+    for sx, sy in ((bx + 26, top + 6), (bx + 30, top + 13), (bx + 29, top + 21),
+                   (bx + 24, top + 27)):
+        star(sx, sy, 3, (255, 222, 0))
+    # --- USA: 7 stripes, blue canton with white stars at top-left
+    bx = x + 50
+    for i in range(7):
+        sy0 = top + i * 16
+        col = (178, 34, 52) if i % 2 == 0 else (255, 255, 255)
+        d.rectangle([bx, sy0, bx + bw, sy0 + 16], fill=col)
+    d.rectangle([bx, top, bx + 16, top + 64], fill=(60, 59, 110))
+    for sx in (bx + 4, bx + 9, bx + 14):
+        for sy in range(top + 6, top + 60, 11):
+            d.ellipse([sx - 1, sy - 1, sx + 1, sy + 1], fill=(255, 255, 255))
+    # --- Russia: white / blue / red horizontal bands
+    bx = x + 96
+    d.rectangle([bx, top, bx + bw, top + 37], fill=(255, 255, 255))
+    d.rectangle([bx, top + 37, bx + bw, top + 75], fill=(0, 57, 166))
+    d.rectangle([bx, top + 75, bx + bw, bot], fill=(213, 0, 50))
 
 
 HERO_DRAW = [draw_bridge, draw_radar, draw_summit]
