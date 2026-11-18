@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""News front page v8 for make.fun bounty news-image-20261117.
+"""News front page v10 for make.fun bounty news-image-20261117.
 
 Same 35-story front page as v2, but the "WHERE IT HAPPENED" section is now
 the dark dotted world map from the user's digest model: dark panel, dotted
@@ -8,7 +8,7 @@ continents, bezier arcs between linked locations, category dots
 category legend inside. The grid story-number circles and REGION . BEAT
 labels are coloured by category (bright circle, darker tint for the label).
 All number text is dark ink, per the digest. The briefs list uses coloured
-dots (no numbers), like the digest.
+dots + bold country/subject tags (no numbers), like the digest.
 Stdlib + Pillow only, no network, deterministic.
 Writes /output/entry.png (JPEG bytes, magic decides the format).
 """
@@ -45,6 +45,7 @@ T_DIP = (168, 106, 0)
 T_ECO = (14, 132, 120)
 T_SOC = (106, 79, 208)
 T_POL = (37, 99, 201)
+T_GREY = (122, 133, 153)  # darker grey tint for sport tags (digest uses #7A8599)
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 
@@ -272,6 +273,15 @@ BRIEFS = [
 BRIEF_COLS = [C_WAR, C_POL, C_WAR, C_SOC, C_ECO, C_SOC, C_ECO, C_POL,
               C_ECO, C_ECO, C_SOC, C_ECO, C_GREY, C_GREY, C_GREY,
               C_ECO, C_ECO, C_ECO, C_DIP, C_ECO]
+
+# country/subject tag per brief (stories 16-35), like the user's digest file
+BRIEF_TAGS = ["IRAN", "UK", "ISRAEL", "EU", "CHINA", "FRANCE", "USA", "USA",
+              "USA", "SPACE", "ERITREA", "SPACE", "SPORT", "SPORT", "SPORT",
+              "USA", "S. KOREA", "CHINA", "UN", "MARKETS"]
+
+# darker tint of each category colour, for tag text on paper
+COL_TINT = {C_WAR: T_WAR, C_DIP: T_DIP, C_ECO: T_ECO, C_SOC: T_SOC,
+            C_POL: T_POL, C_GREY: T_GREY}
 
 # ---------------------------------------------------------------- map
 # Coarse continent outlines as (lon, lat), written from geographic
@@ -557,17 +567,19 @@ def build():
     by = 854
     text(d, (16, by), "ALSO ON TUESDAY 17 NOVEMBER", F_TITLE(16), NAVY)
     d.rectangle([316, by + 9, W - 16, by + 11], fill=RED)
-    bf = F_BODY(12)
+    bf, btf = F_BODY(12), F_TITLE(11.5)
     for i, b in enumerate(BRIEFS):
         col, row = divmod(i, 10)
         x = 16 + col * 496
         y = 870 + row * 11
-        # coloured dot only, no number (like the user's digest file)
+        # coloured dot + bold tag + body (like the user's digest file), no number
         d.ellipse([x, y + 1, x + 8, y + 9], fill=BRIEF_COLS[i])
-        bx = x + 14
+        tag = BRIEF_TAGS[i]
+        text(d, (x + 14, y), tag, btf, COL_TINT[BRIEF_COLS[i]])
+        bx = x + 14 + btf.getlength(tag) + 6
         s = b
-        if bf.getlength(s) > 496 - 14 - 4:
-            while bf.getlength(s) > 496 - 14 - 4 and len(s) > 20:
+        if bf.getlength(s) > 496 - (bx - x) - 4:
+            while bf.getlength(s) > 496 - (bx - x) - 4 and len(s) > 20:
                 s = s[:-4] + "..."
             truncated.append("brief %d" % (i + 16))
         text(d, (bx, y), s, bf, INK)
