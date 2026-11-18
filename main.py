@@ -438,7 +438,7 @@ def build():
         d.ellipse([x + 8, y + 7, x + 28, y + 27], fill=col)
         nf = F_TITLE(12)
         d.text((x + 18 - nf.getlength(n) / 2, y + 10), n, font=nf,
-               fill=PIN_INK if col == C_DIP else (255, 255, 255))
+               fill=PIN_INK)
         text(d, (x + 34, y + 6), label, F_TITLE(11), tint)
         hl, cut = fit_lines(head, F_TITLE(14), cw - 42, 2)
         if cut:
@@ -537,7 +537,7 @@ def build():
             s = str(n)
             nf = F_TITLE(10)
             d.text((p[0] - nf.getlength(s) / 2, p[1] - 5), s, font=nf,
-                   fill=PIN_INK if col == C_DIP else (255, 255, 255))
+                   fill=PIN_INK)
 
     for n, lo, la, col in PINS:
         pin(px(lo, la), n, col)
