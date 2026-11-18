@@ -447,8 +447,7 @@ def build():
     def px(lon, lat):
         return (PX0 + (lon + 170) * K, PY0 + (TOP - lat) * K)
 
-    # label + legend inside the panel
-    text(d, (mx0 + 16, my0 + 12), "WHERE THE DAY HAPPENED", F_TITLE(12), LBL)
+    # legend inside the panel
     lf = F_TITLE(12)
     items = []
     for lab, col in LEGEND:
