@@ -7,8 +7,9 @@ continents, bezier arcs between linked locations, category dots
 (stories 1-3 plain, stories 4-15 numbered), small dots for briefs locations,
 category legend inside. The grid story-number circles and REGION . BEAT
 labels are coloured by category (bright circle, darker tint for the label).
-All number text is dark ink, per the digest. The briefs list uses coloured
-dots + bold country/subject tags (no numbers), like the digest.
+All number text is dark ink, per the digest. The briefs list follows the
+digest's exact logic: 3 columns, coloured dot + bold country/subject tag +
+body, wrapping to a second line, never truncated.
 Stdlib + Pillow only, no network, deterministic.
 Writes /output/entry.png (JPEG bytes, magic decides the format).
 """
@@ -381,7 +382,7 @@ HOLES = [
 # (story number, lon, lat, category colour)
 PINS = [(1, 36.5, 45.3, C_WAR), (2, 50.5, 26.2, C_WAR),
         (3, 114.1, 22.5, C_DIP), (4, 121.0, 14.6, C_DIP),
-        (5, 59.5, 24.0, C_ECO), (6, -121.9, 37.4, C_ECO),
+        (5, 61.5, 22.5, C_ECO), (6, -121.9, 37.4, C_ECO),
         (7, 23.0, -3.0, C_SOC), (8, -100.0, 39.0, C_SOC),
         (9, -80.5, 28.4, C_ECO), (10, 30.7, 36.9, C_DIP),
         (11, 22.5, 45.2, C_POL), (12, 106.9, 47.9, C_POL),
@@ -435,7 +436,7 @@ def build():
             yy += 14
 
     # ---- grid header
-    gy = 274
+    gy = 270
     text(d, (16, gy), "MORE OF THE DAY", F_TITLE(16), NAVY)
     lbl = "STORIES 4\u201315"
     lw = F_TITLE(12).getlength(lbl)
@@ -444,7 +445,7 @@ def build():
     text(d, (W - 16 - lw, gy + 2), lbl, F_TITLE(12), GREY)
 
     # ---- grid 3 x 4
-    gy0, cw, ch, cg = 292, 320, 62, 16
+    gy0, cw, ch, cg = 286, 320, 58, 16
     for i, (label, head, summ) in enumerate(GRID):
         r, c = divmod(i, 3)
         x = 16 + c * (cw + cg)
@@ -457,30 +458,30 @@ def build():
         d.text((x + 18 - nf.getlength(n) / 2, y + 10), n, font=nf,
                fill=PIN_INK)
         text(d, (x + 34, y + 6), label, F_TITLE(11), tint)
-        hl, cut = fit_lines(head, F_TITLE(14), cw - 42, 2)
+        hl, cut = fit_lines(head, F_TITLE(13), cw - 42, 2)
         if cut:
             truncated.append("grid head %d" % (i + 4))
-        yy = y + 17
+        yy = y + 16
         for ln in hl:
-            text(d, (x + 34, yy), ln, F_TITLE(14), NAVY)
-            yy += 15
+            text(d, (x + 34, yy), ln, F_TITLE(13), NAVY)
+            yy += 14
         sl, cut = fit_lines(summ, F_BODY(11), cw - 42, 1)
         if cut:
             truncated.append("grid summ %d" % (i + 4))
-        sy = y + 32 if len(hl) == 1 else y + 48
+        sy = y + 31 if len(hl) == 1 else y + 44
         for ln in sl:
             text(d, (x + 34, sy), ln, F_BODY(11), GREY)
             sy += 13
 
     # ---- map header
-    my = 556
+    my = 532
     text(d, (16, my), "WHERE IT HAPPENED", F_TITLE(16), NAVY)
     d.rectangle([216, my + 9, W - 16, my + 11], fill=RED)
 
     # ---- dark dotted map panel (digest model)
-    mx0, my0, mx1, my1 = 16, 574, W - 16, 846
+    mx0, my0, mx1, my1 = 16, 550, W - 16, 772
     d.rounded_rectangle([mx0, my0, mx1, my1], radius=8, fill=PANEL)
-    K = 2.25
+    K = 1.75
     TOP = 70
     MW, MH = int(350 * K), int(110 * K)
     PX0 = mx0 + (mx1 - mx0 - MW) // 2
@@ -544,7 +545,7 @@ def build():
     for lo, la, col in BDOTS:
         dot(px(lo, la), col)
 
-    def pin(p, n, col, r=9):
+    def pin(p, n, col, r=8):
         d.ellipse([p[0] - r - 4, p[1] - r - 4, p[0] + r + 4, p[1] + r + 4],
                   fill=mix(PANEL, col, 0.28))
         d.ellipse([p[0] - r, p[1] - r, p[0] + r, p[1] + r], fill=col,
@@ -563,26 +564,39 @@ def build():
     lf2 = F_TITLE(11)
     text(d, (sx - 8 - lf2.getlength(lab), sy + 12), lab, lf2, SHZ)
 
-    # ---- briefs
-    by = 854
+    # ---- briefs (digest logic: 3 cols, dot + TAG + body, wraps to line 2)
+    by = 778
     text(d, (16, by), "ALSO ON TUESDAY 17 NOVEMBER", F_TITLE(16), NAVY)
     d.rectangle([316, by + 9, W - 16, by + 11], fill=RED)
-    bf, btf = F_BODY(12), F_TITLE(11.5)
+    btf, bf = F_TITLE(11), F_BODY(11)
+    COLW, ROWH = 316, 27
     for i, b in enumerate(BRIEFS):
-        col, row = divmod(i, 10)
-        x = 16 + col * 496
-        y = 870 + row * 11
-        # coloured dot + bold tag + body (like the user's digest file), no number
-        d.ellipse([x, y + 1, x + 8, y + 9], fill=BRIEF_COLS[i])
+        col, row = divmod(i, 7)
+        x0 = 16 + col * (COLW + 20)
+        y0 = by + 22 + row * ROWH
+        # coloured dot + bold tag + body, no number (digest logic)
+        d.ellipse([x0, y0 + 1, x0 + 8, y0 + 9], fill=BRIEF_COLS[i])
+        tx = x0 + 14
         tag = BRIEF_TAGS[i]
-        text(d, (x + 14, y), tag, btf, COL_TINT[BRIEF_COLS[i]])
-        bx = x + 14 + btf.getlength(tag) + 6
-        s = b
-        if bf.getlength(s) > 496 - (bx - x) - 4:
-            while bf.getlength(s) > 496 - (bx - x) - 4 and len(s) > 20:
-                s = s[:-4] + "..."
-            truncated.append("brief %d" % (i + 16))
-        text(d, (bx, y), s, bf, INK)
+        text(d, (tx, y0), tag, btf, COL_TINT[BRIEF_COLS[i]])
+        tw = btf.getlength(tag) + 6
+        words = b.split()
+        line1, cur = "", ""
+        avail = COLW - 15 - tw
+        j = 0
+        while j < len(words):
+            t = (cur + " " + words[j]).strip()
+            if bf.getlength(t) <= avail:
+                cur = t
+                j += 1
+            else:
+                break
+        text(d, (tx + tw, y0), cur, bf, INK)
+        rest = " ".join(words[j:])
+        if rest:
+            if bf.getlength(rest) > COLW - 15:
+                truncated.append("brief %d line2 overflow" % (i + 16))
+            text(d, (tx, y0 + 13), rest, bf, INK)
 
     # ---- footer
     d.rectangle([16, 991, W - 16, 992], fill=BORDER)
