@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""News front page v3 for make.fun bounty news-image-20261117.
+"""News front page v6 for make.fun bounty news-image-20261117.
 
 Same 35-story front page as v2, but the "WHERE IT HAPPENED" section is now
 the dark dotted world map from the user's digest model: dark panel, dotted
-continents, bezier arcs between linked locations, solid category dots
-(stories 1-15, colour only, no numbers), small dots for briefs locations,
-category legend inside.
+continents, bezier arcs between linked locations, category dots
+(stories 1-3 plain, stories 4-15 numbered), small dots for briefs locations,
+category legend inside. The grid story-number circles and REGION . BEAT
+labels are coloured by category (bright circle, darker tint for the label).
 Stdlib + Pillow only, no network, deterministic.
 Writes /output/entry.png (JPEG bytes, magic decides the format).
 """
@@ -36,6 +37,12 @@ C_SOC = (160, 132, 242)
 C_POL = (90, 168, 254)
 C_GREY = (154, 167, 192)
 PIN_INK = (16, 19, 26)
+# darker tints of the category colours, for text on paper
+T_WAR = (200, 40, 28)
+T_DIP = (168, 106, 0)
+T_ECO = (14, 132, 120)
+T_SOC = (106, 79, 208)
+T_POL = (37, 99, 201)
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 
@@ -218,6 +225,22 @@ GRID = [
     ("ASIA \u00b7 DEFENCE", "Japan scrambles jets as Russian planes breach airspace",
      "Tokyo protests after two Russian planes cross."),
 ]
+
+# grid story label -> (bright circle colour, darker label tint)
+GRID_COL = {
+    "ASIA \u00b7 DIPLOMACY": (C_DIP, T_DIP),
+    "MIDDLE EAST \u00b7 ENERGY": (C_ECO, T_ECO),
+    "TECH \u00b7 MARKETS": (C_ECO, T_ECO),
+    "AFRICA \u00b7 HEALTH": (C_SOC, T_SOC),
+    "AMERICAS \u00b7 HEALTH": (C_SOC, T_SOC),
+    "SPACE \u00b7 UPDATE": (C_ECO, T_ECO),
+    "CLIMATE \u00b7 COP31": (C_POL, T_POL),
+    "EUROPE \u00b7 POLITICS": (C_POL, T_POL),
+    "ASIA \u00b7 POLITICS": (C_POL, T_POL),
+    "EUROPE \u00b7 PROTEST": (C_SOC, T_SOC),
+    "VATICAN \u00b7 FAITH": (C_SOC, T_SOC),
+    "ASIA \u00b7 DEFENCE": (C_WAR, T_WAR),
+}
 
 # ---------------------------------------------------------------- briefs
 BRIEFS = [
@@ -411,11 +434,12 @@ def build():
         y = gy0 + r * (ch + 2)
         d.rectangle([x, y, x + cw, y + ch], fill=CARD, outline=BORDER, width=1)
         n = str(i + 4)
-        d.ellipse([x + 8, y + 7, x + 28, y + 27], fill=RED)
+        col, tint = GRID_COL[label]
+        d.ellipse([x + 8, y + 7, x + 28, y + 27], fill=col)
         nf = F_TITLE(12)
         d.text((x + 18 - nf.getlength(n) / 2, y + 10), n, font=nf,
-               fill=(255, 255, 255))
-        text(d, (x + 34, y + 6), label, F_TITLE(11), RED)
+               fill=PIN_INK if col == C_DIP else (255, 255, 255))
+        text(d, (x + 34, y + 6), label, F_TITLE(11), tint)
         hl, cut = fit_lines(head, F_TITLE(14), cw - 42, 2)
         if cut:
             truncated.append("grid head %d" % (i + 4))
@@ -503,14 +527,20 @@ def build():
     for lo, la, col in BDOTS:
         dot(px(lo, la), col)
 
-    def pin(p, col, r=9):
+    def pin(p, n, col, r=9):
         d.ellipse([p[0] - r - 4, p[1] - r - 4, p[0] + r + 4, p[1] + r + 4],
                   fill=mix(PANEL, col, 0.28))
         d.ellipse([p[0] - r, p[1] - r, p[0] + r, p[1] + r], fill=col,
                   outline=(255, 255, 255), width=2)
+        if n >= 4:
+            # numbered for grid stories only; heroes (1-3) stay plain dots
+            s = str(n)
+            nf = F_TITLE(10)
+            d.text((p[0] - nf.getlength(s) / 2, p[1] - 5), s, font=nf,
+                   fill=PIN_INK if col == C_DIP else (255, 255, 255))
 
     for n, lo, la, col in PINS:
-        pin(px(lo, la), col)
+        pin(px(lo, la), n, col)
     sx, sy = px(114.1, 22.5)
     lab = "Shenzhen"
     lf2 = F_TITLE(11)
