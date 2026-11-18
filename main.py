@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-"""News front page v10 for make.fun bounty news-image-20261117.
+"""News front page v12 for make.fun bounty news-image-20261117.
 
-Same 35-story front page as v2, but the "WHERE IT HAPPENED" section is now
-the dark dotted world map from the user's digest model: dark panel, dotted
-continents, bezier arcs between linked locations, category dots
-(stories 1-3 plain, stories 4-15 numbered), small dots for briefs locations,
-category legend inside. The grid story-number circles and REGION . BEAT
-labels are coloured by category (bright circle, darker tint for the label).
-All number text is dark ink, per the digest. The briefs list follows the
-digest's exact logic: 3 columns, coloured dot + bold country/subject tag +
-body, wrapping to a second line, never truncated.
+Same 35-story front page as v11, but the 3 hero cards are now horizontal:
+illustration on the left (full card height, 140px wide) and text beside it
+on the right, so the heroes hold their own against the big map below.
+Hero kicker accents stay per-category tints (war dark red, diplomacy dark
+gold). Everything below the heroes is unchanged.
 Stdlib + Pillow only, no network, deterministic.
 Writes /output/entry.png (JPEG bytes, magic decides the format).
 """
@@ -126,82 +122,82 @@ HERO_TINT = [T_WAR, T_WAR, T_DIP]
 
 
 def draw_bridge(d, x, y, w, h):
-    d.rectangle([x, y, x + w, y + h], fill=SKY)
-    d.rectangle([x, y + 40, x + w, y + h], fill=SEA)
-    d.ellipse([x + w - 52, y + 6, x + w - 22, y + 36], fill=(242, 201, 76))
-    for tx in (x + 62, x + w - 82):
-        d.rectangle([tx, y + 12, tx + 14, y + 40], fill=(70, 76, 84))
-        d.rectangle([tx - 6, y + 8, tx + 20, y + 14], fill=(70, 76, 84))
-    d.rectangle([x, y + 38, x + 138, y + 43], fill=(52, 58, 66))
-    d.rectangle([x + 182, y + 38, x + w, y + 43], fill=(52, 58, 66))
-    d.polygon([(x + 140, y + 38), (x + 180, y + 38), (x + 168, y + 54),
-               (x + 148, y + 54)], fill=(52, 58, 66))
-    for cx0, cx1 in ((x + 62, x + 138), (x + w - 68, x + 182)):
-        d.line([cx0 + 7, y + 12, cx1, y + 38], fill=(120, 128, 136), width=2)
-        d.line([cx0 + 7, y + 12, x + 4, y + 38], fill=(120, 128, 136), width=2)
-    for sx, sy, r in ((x + 152, y + 28, 6), (x + 164, y + 22, 7), (x + 176, y + 30, 5)):
+    # Portrait panel: bridge over the strait, span collapsed in the middle.
+    sky_h = int(h * 0.56)
+    d.rectangle([x, y, x + w, y + sky_h], fill=SKY)
+    d.rectangle([x, y + sky_h, x + w, y + h], fill=SEA)
+    d.ellipse([x + w - 38, y + 8, x + w - 12, y + 34], fill=(242, 201, 76))
+    for tx in (x + 16, x + w - 30):
+        d.rectangle([tx, y + 30, tx + 13, y + sky_h], fill=(70, 76, 84))
+        d.rectangle([tx - 6, y + 26, tx + 19, y + 32], fill=(70, 76, 84))
+    d.rectangle([x, y + 82, x + 58, y + 88], fill=(52, 58, 66))
+    d.rectangle([x + 82, y + 82, x + w, y + 88], fill=(52, 58, 66))
+    d.polygon([(x + 60, y + 82), (x + 80, y + 82), (x + 74, y + 106),
+               (x + 64, y + 106)], fill=(52, 58, 66))
+    d.line([x + 22, y + 30, x + 58, y + 82], fill=(120, 128, 136), width=2)
+    d.line([x + 22, y + 30, x + 4, y + 82], fill=(120, 128, 136), width=2)
+    d.line([x + w - 23, y + 30, x + 82, y + 82], fill=(120, 128, 136), width=2)
+    d.line([x + w - 23, y + 30, x + w - 4, y + 82], fill=(120, 128, 136), width=2)
+    for sx, sy, r in ((x + 64, y + 62, 6), (x + 72, y + 52, 7), (x + 78, y + 64, 5)):
         d.ellipse([sx - r, sy - r, sx + r, sy + r], fill=(200, 200, 196))
-    d.ellipse([x + 146, y + 50, x + 174, y + 58], fill=(220, 235, 242))
+    d.ellipse([x + 58, y + 104, x + 82, y + 112], fill=(220, 235, 242))
 
 
 def draw_radar(d, x, y, w, h):
-    d.rectangle([x, y, x + w, y + h], fill=(34, 52, 77))
-    for sx, sy in ((x + 30, y + 10), (x + 90, y + 6), (x + 200, y + 8),
-                   (x + 260, y + 14), (x + 150, y + 16)):
+    # Portrait panel: night sky, radar dome on the ground, drones inbound.
+    d.rectangle([x, y, x + w, y + 108], fill=(34, 52, 77))
+    for sx, sy in ((x + 16, y + 12), (x + 48, y + 8), (x + 96, y + 10),
+                   (x + 124, y + 18), (x + 72, y + 20), (x + 30, y + 34)):
         d.ellipse([sx, sy, sx + 3, sy + 3], fill=(220, 225, 235))
-    d.rectangle([x, y + 48, x + w, y + h], fill=(46, 74, 58))
+    d.rectangle([x, y + 108, x + w, y + h], fill=(46, 74, 58))
     cx = x + w // 2
-    d.rectangle([cx - 3, y + 30, cx + 3, y + 48], fill=(200, 205, 212))
-    d.pieslice([cx - 30, y + 18, cx + 30, y + 78], 180, 360, fill=(235, 238, 242))
-    d.line([cx, y + 30, cx + 22, y + 18], fill=(235, 238, 242), width=3)
-    d.ellipse([cx + 18, y + 14, cx + 26, y + 22], fill=(242, 201, 76))
-    for dx, dy in ((x + 48, y + 26), (x + 128, y + 14), (x + 238, y + 30)):
+    d.rectangle([cx - 3, y + 88, cx + 3, y + 108], fill=(200, 205, 212))
+    d.pieslice([cx - 32, y + 52, cx + 32, y + 164], 180, 360, fill=(235, 238, 242))
+    d.line([cx, y + 80, cx + 26, y + 62], fill=(235, 238, 242), width=3)
+    d.ellipse([cx + 22, y + 62, cx + 30, y + 70], fill=(242, 201, 76))
+    for dx, dy in ((x + 24, y + 44), (x + 104, y + 36), (x + 112, y + 78)):
         d.rectangle([dx - 9, dy, dx + 9, dy + 5], fill=(20, 22, 28))
         d.line([dx - 14, dy - 3, dx + 14, dy - 3], fill=(20, 22, 28), width=2)
         d.line([dx - 14, dy + 8, dx + 14, dy + 8], fill=(20, 22, 28), width=2)
-    for bx, by in ((x + 48, y + 40), (x + 128, y + 30), (x + 238, y + 44)):
-        d.line([bx - 7, by, bx + 7, by], fill=(242, 201, 76), width=3)
-        d.line([bx, by - 7, bx, by + 7], fill=(242, 201, 76), width=3)
-        d.line([bx - 5, by - 5, bx + 5, by + 5], fill=(242, 201, 76), width=2)
-        d.line([bx - 5, by + 5, bx + 5, by - 5], fill=(242, 201, 76), width=2)
-    for dx, dy in ((x + 48, y + 40), (x + 128, y + 30), (x + 238, y + 44)):
+        d.line([dx - 7, dy - 8, dx + 7, dy + 13], fill=(242, 201, 76), width=2)
+        d.line([dx - 7, dy + 13, dx + 7, dy - 8], fill=(242, 201, 76), width=2)
         for t in range(0, 11):
             px = cx + (dx - cx) * t / 10
-            py = (y + 34) + (dy - (y + 34)) * t / 10
+            py = (y + 84) + (dy - (y + 84)) * t / 10
             d.ellipse([px - 1, py - 1, px + 1, py + 1], fill=(242, 201, 76))
 
 
 def draw_summit(d, x, y, w, h):
-    d.rectangle([x, y, x + w, y + h], fill=(223, 233, 242))
-    for bx, bw, bh in ((x + 8, 44, 30), (x + 58, 30, 40), (x + 94, 52, 26),
-                       (x + 152, 36, 44), (x + 194, 48, 34), (x + 248, 34, 42),
-                       (x + 288, 26, 28)):
-        d.rectangle([bx, y + 44 - bh, bx + bw, y + 44], fill=(120, 138, 158))
-        for wy in range(y + 48 - bh, y + 40, 9):
-            for wx in range(bx + 6, bx + bw - 4, 10):
+    # Portrait panel: skyline with three flags (CN, US, RU) on poles.
+    d.rectangle([x, y, x + w, y + 104], fill=(223, 233, 242))
+    for bx, bw, bh in ((x + 4, 22, 48), (x + 30, 18, 60), (x + 52, 26, 44),
+                       (x + 82, 20, 56), (x + 104, 22, 52), (x + 126, 12, 62)):
+        d.rectangle([bx, y + 104 - bh, bx + bw, y + 104], fill=(120, 138, 158))
+        for wy in range(y + 108 - bh, y + 100, 9):
+            for wx in range(bx + 5, bx + bw - 4, 10):
                 d.rectangle([wx, wy, wx + 4, wy + 5], fill=(232, 182, 76))
-    d.rectangle([x, y + 44, x + w, y + h], fill=(70, 90, 70))
-    for px, code in ((x + 84, "CN"), (x + 160, "US"), (x + 236, "RU")):
-        d.rectangle([px, y + 16, px + 3, y + 44], fill=(60, 60, 60))
-        fx, fy = px + 3, y + 16
+    d.rectangle([x, y + 104, x + w, y + h], fill=(70, 90, 70))
+    for px, code in ((x + 18, "CN"), (x + 60, "US"), (x + 102, "RU")):
+        d.rectangle([px, y + 14, px + 3, y + 104], fill=(60, 60, 60))
+        fx, fy = px + 3, y + 14
         if code == "CN":
-            d.rectangle([fx, fy, fx + 42, fy + 16], fill=(222, 41, 16))
-            for sx, sy in ((fx + 8, fy + 4), (fx + 16, fy + 3), (fx + 14, fy + 8),
-                           (fx + 20, fy + 7), (fx + 17, fy + 11)):
+            d.rectangle([fx, fy, fx + 30, fy + 13], fill=(222, 41, 16))
+            for sx, sy in ((fx + 6, fy + 3), (fx + 12, fy + 2), (fx + 10, fy + 6),
+                           (fx + 15, fy + 5), (fx + 12, fy + 9)):
                 d.ellipse([sx, sy, sx + 3, sy + 3], fill=(255, 222, 0))
         elif code == "US":
-            d.rectangle([fx, fy, fx + 42, fy + 16], fill=(255, 255, 255))
-            for i, yy in enumerate((0, 5, 9, 14)):
-                d.rectangle([fx, fy + yy, fx + 42, fy + yy + 2],
+            d.rectangle([fx, fy, fx + 30, fy + 13], fill=(255, 255, 255))
+            for i, yy in enumerate((0, 4, 8)):
+                d.rectangle([fx, fy + yy, fx + 30, fy + yy + 2],
                             fill=(178, 34, 52))
-            d.rectangle([fx, fy, fx + 18, fy + 8], fill=(60, 59, 110))
-            for sx in range(fx + 3, fx + 17, 5):
-                for sy in range(fy + 2, fy + 8, 4):
+            d.rectangle([fx, fy, fx + 13, fy + 7], fill=(60, 59, 110))
+            for sx in range(fx + 2, fx + 12, 4):
+                for sy in range(fy + 1, fy + 6, 3):
                     d.ellipse([sx, sy, sx + 2, sy + 2], fill=(255, 255, 255))
         else:
-            d.rectangle([fx, fy, fx + 42, fy + 5], fill=(255, 255, 255))
-            d.rectangle([fx, fy + 5, fx + 42, fy + 11], fill=(0, 57, 166))
-            d.rectangle([fx, fy + 11, fx + 42, fy + 16], fill=(213, 0, 50))
+            d.rectangle([fx, fy, fx + 30, fy + 4], fill=(255, 255, 255))
+            d.rectangle([fx, fy + 4, fx + 30, fy + 9], fill=(0, 57, 166))
+            d.rectangle([fx, fy + 9, fx + 30, fy + 13], fill=(213, 0, 50))
 
 
 HERO_DRAW = [draw_bridge, draw_radar, draw_summit]
@@ -417,27 +413,31 @@ def build():
     center(d, 44, "Tuesday 17 November 2026", F_TITLE(42), GOLD)
     d.rectangle([40, 93, W - 40, 95], fill=GOLD)
 
-    # ---- heroes
+    # ---- heroes: horizontal cards — illustration left, text right
     hy, hh, hw, gap = 104, 160, 320, 16
+    iw = 140  # illustration width (full card height)
     for i, (kicker, head, summ) in enumerate(HEROES):
         x = 16 + i * (hw + gap)
         d.rectangle([x, hy, x + hw, hy + hh], fill=CARD, outline=BORDER, width=1)
-        HERO_DRAW[i](d, x + 1, hy + 1, hw - 2, 60)
-        ty = hy + 68
-        text(d, (x + 10, ty), kicker, F_TITLE(12), HERO_TINT[i])
-        hl, cut = fit_lines(head, F_TITLE(19), hw - 20, 2)
+        HERO_DRAW[i](d, x + 1, hy + 1, iw, hh - 2)
+        tx = x + iw + 10
+        tw = hw - iw - 20  # 160
+        ty = hy + 10
+        text(d, (tx, ty), kicker, F_TITLE(12), HERO_TINT[i])
+        hl, cut = fit_lines(head, F_TITLE(14), tw, 3)
         if cut:
             truncated.append("hero head %d" % (i + 1))
         yy = ty + 18
         for ln in hl:
-            text(d, (x + 10, yy), ln, F_TITLE(19), NAVY)
-            yy += 22
-        sl, cut = fit_lines(summ, F_BODY(12), hw - 20, 2)
+            text(d, (tx, yy), ln, F_TITLE(14), NAVY)
+            yy += 18
+        sl, cut = fit_lines(summ, F_BODY(11), tw, 4)
         if cut:
             truncated.append("hero summ %d" % (i + 1))
+        yy += 4
         for ln in sl:
-            text(d, (x + 10, yy), ln, F_BODY(12), INK)
-            yy += 14
+            text(d, (tx, yy), ln, F_BODY(11), INK)
+            yy += 13
 
     # ---- grid header
     gy = 270
