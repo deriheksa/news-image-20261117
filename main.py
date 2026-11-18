@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""News front page v12 for make.fun bounty news-image-20261117.
+"""News front page v13 for make.fun bounty news-image-20261117.
 
-Same 35-story front page as v11, but the 3 hero cards are now horizontal:
-illustration on the left (full card height, 140px wide) and text beside it
-on the right, so the heroes hold their own against the big map below.
-Hero kicker accents stay per-category tints (war dark red, diplomacy dark
-gold). Everything below the heroes is unchanged.
+Same 35-story front page as v12, but the 3 hero illustrations are redrawn
+for the tall portrait panel (140x158): a single bridge tower with the span
+dropping into the strait, a radar scope with sweeping beam and drone blips
+(replacing the dome + X drones), and the three summit flags above a skyline
+that fills the panel to the bottom edge. Layout, text, kicker accents
+(war dark red, diplomacy dark gold) and everything below the heroes are
+unchanged.
 Stdlib + Pillow only, no network, deterministic.
 Writes /output/entry.png (JPEG bytes, magic decides the format).
 """
@@ -122,82 +124,102 @@ HERO_TINT = [T_WAR, T_WAR, T_DIP]
 
 
 def draw_bridge(d, x, y, w, h):
-    # Portrait panel: bridge over the strait, span collapsed in the middle.
-    sky_h = int(h * 0.56)
-    d.rectangle([x, y, x + w, y + sky_h], fill=SKY)
-    d.rectangle([x, y + sky_h, x + w, y + h], fill=SEA)
-    d.ellipse([x + w - 38, y + 8, x + w - 12, y + 34], fill=(242, 201, 76))
-    for tx in (x + 16, x + w - 30):
-        d.rectangle([tx, y + 30, tx + 13, y + sky_h], fill=(70, 76, 84))
-        d.rectangle([tx - 6, y + 26, tx + 19, y + 32], fill=(70, 76, 84))
+    # Portrait panel: ONE bridge tower, deck broken on the right, the
+    # broken span dropping into the strait with a splash. (v12's wide
+    # two-tower span squeezed into the tall panel left dead water below.)
+    d.rectangle([x, y, x + w, y + 88], fill=SKY)
+    d.rectangle([x, y + 88, x + w, y + h], fill=SEA)
+    # sun, top-left to balance the break on the right
+    d.ellipse([x + 10, y + 8, x + 36, y + 34], fill=(242, 201, 76))
+    # single tower, centred
+    d.rectangle([x + 58, y + 16, x + 82, y + 88], fill=(70, 76, 84))
+    d.rectangle([x + 52, y + 10, x + 88, y + 18], fill=(70, 76, 84))
+    # deck: intact on the left, broken off on the right of the tower
     d.rectangle([x, y + 82, x + 58, y + 88], fill=(52, 58, 66))
-    d.rectangle([x + 82, y + 82, x + w, y + 88], fill=(52, 58, 66))
-    d.polygon([(x + 60, y + 82), (x + 80, y + 82), (x + 74, y + 106),
-               (x + 64, y + 106)], fill=(52, 58, 66))
-    d.line([x + 22, y + 30, x + 58, y + 82], fill=(120, 128, 136), width=2)
-    d.line([x + 22, y + 30, x + 4, y + 82], fill=(120, 128, 136), width=2)
-    d.line([x + w - 23, y + 30, x + 82, y + 82], fill=(120, 128, 136), width=2)
-    d.line([x + w - 23, y + 30, x + w - 4, y + 82], fill=(120, 128, 136), width=2)
-    for sx, sy, r in ((x + 64, y + 62, 6), (x + 72, y + 52, 7), (x + 78, y + 64, 5)):
+    d.rectangle([x + 82, y + 82, x + 112, y + 88], fill=(52, 58, 66))
+    # cables fanning from the tower top to the deck
+    d.line([x + 70, y + 18, x + 8, y + 82], fill=(120, 128, 136), width=2)
+    d.line([x + 70, y + 18, x + 50, y + 82], fill=(120, 128, 136), width=2)
+    d.line([x + 70, y + 18, x + 106, y + 82], fill=(120, 128, 136), width=2)
+    # snapped cable dangling from the broken end
+    d.line([x + 112, y + 82, x + 116, y + 98], fill=(120, 128, 136), width=2)
+    # smoke rising from the break
+    for sx, sy, r in ((x + 108, y + 64, 6), (x + 118, y + 54, 7), (x + 124, y + 66, 5)):
         d.ellipse([sx - r, sy - r, sx + r, sy + r], fill=(200, 200, 196))
-    d.ellipse([x + 58, y + 104, x + 82, y + 112], fill=(220, 235, 242))
+    # the broken span, tilted, dropping into the water
+    d.polygon([(x + 108, y + 100), (x + 134, y + 106), (x + 128, y + 124),
+               (x + 104, y + 118)], fill=(52, 58, 66))
+    # splash where the span hits the water
+    d.ellipse([x + 100, y + 122, x + 136, y + 132], fill=(220, 235, 242))
+    d.ellipse([x + 108, y + 116, x + 116, y + 122], fill=(220, 235, 242))
+    # small waves in the water
+    d.line([x + 12, y + 142, x + 44, y + 142], fill=(220, 235, 242), width=2)
+    d.line([x + 96, y + 150, x + 128, y + 150], fill=(220, 235, 242), width=2)
 
 
 def draw_radar(d, x, y, w, h):
-    # Portrait panel: night sky, radar dome on the ground, drones inbound.
-    d.rectangle([x, y, x + w, y + 108], fill=(34, 52, 77))
-    for sx, sy in ((x + 16, y + 12), (x + 48, y + 8), (x + 96, y + 10),
-                   (x + 124, y + 18), (x + 72, y + 20), (x + 30, y + 34)):
+    # Portrait panel: a radar SCOPE — big round screen, sweeping beam,
+    # drone blips — on a stand, night sky behind. (v12's dome + yellow
+    # X "drones" read as X marks, and its bottom third was empty green.)
+    d.rectangle([x, y, x + w, y + h], fill=(34, 52, 77))
+    # stars in the corners, outside the scope
+    for sx, sy in ((x + 12, y + 10), (x + 128, y + 12), (x + 16, y + 146),
+                   (x + 124, y + 148), (x + 70, y + 6)):
         d.ellipse([sx, sy, sx + 3, sy + 3], fill=(220, 225, 235))
-    d.rectangle([x, y + 108, x + w, y + h], fill=(46, 74, 58))
-    cx = x + w // 2
-    d.rectangle([cx - 3, y + 88, cx + 3, y + 108], fill=(200, 205, 212))
-    d.pieslice([cx - 32, y + 52, cx + 32, y + 164], 180, 360, fill=(235, 238, 242))
-    d.line([cx, y + 80, cx + 26, y + 62], fill=(235, 238, 242), width=3)
-    d.ellipse([cx + 22, y + 62, cx + 30, y + 70], fill=(242, 201, 76))
-    for dx, dy in ((x + 24, y + 44), (x + 104, y + 36), (x + 112, y + 78)):
-        d.rectangle([dx - 9, dy, dx + 9, dy + 5], fill=(20, 22, 28))
-        d.line([dx - 14, dy - 3, dx + 14, dy - 3], fill=(20, 22, 28), width=2)
-        d.line([dx - 14, dy + 8, dx + 14, dy + 8], fill=(20, 22, 28), width=2)
-        d.line([dx - 7, dy - 8, dx + 7, dy + 13], fill=(242, 201, 76), width=2)
-        d.line([dx - 7, dy + 13, dx + 7, dy - 8], fill=(242, 201, 76), width=2)
-        for t in range(0, 11):
-            px = cx + (dx - cx) * t / 10
-            py = (y + 84) + (dy - (y + 84)) * t / 10
-            d.ellipse([px - 1, py - 1, px + 1, py + 1], fill=(242, 201, 76))
+    cx, cy, R = x + 70, y + 70, 54
+    # the scope screen
+    d.ellipse([cx - R, cy - R, cx + R, cy + R], fill=(205, 232, 214))
+    d.ellipse([cx - R, cy - R, cx + R, cy + R], outline=(90, 130, 105), width=2)
+    # concentric rings + cross hairs
+    for r in (36, 18):
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=(140, 175, 150), width=1)
+    d.line([cx - R, cy, cx + R, cy], fill=(140, 175, 150), width=1)
+    d.line([cx, cy - R, cx, cy + R], fill=(140, 175, 150), width=1)
+    # sweeping beam, up-right
+    d.line([cx, cy, cx + 35, cy - 41], fill=(242, 201, 76), width=3)
+    # drone blips on the scope
+    for bx, by in ((cx - 28, cy - 18), (cx + 30, cy + 8), (cx - 8, cy + 30)):
+        d.ellipse([bx - 4, by - 4, bx + 4, by + 4], fill=(242, 201, 76))
+    # stand under the scope
+    d.rectangle([cx - 3, cy + R, cx + 3, y + 142], fill=(70, 76, 84))
+    d.polygon([(cx - 16, y + h), (cx + 16, y + h), (cx + 10, y + 142),
+               (cx - 10, y + 142)], fill=(70, 76, 84))
 
 
 def draw_summit(d, x, y, w, h):
-    # Portrait panel: skyline with three flags (CN, US, RU) on poles.
-    d.rectangle([x, y, x + w, y + 104], fill=(223, 233, 242))
-    for bx, bw, bh in ((x + 4, 22, 48), (x + 30, 18, 60), (x + 52, 26, 44),
-                       (x + 82, 20, 56), (x + 104, 22, 52), (x + 126, 12, 62)):
-        d.rectangle([bx, y + 104 - bh, bx + bw, y + 104], fill=(120, 138, 158))
-        for wy in range(y + 108 - bh, y + 100, 9):
+    # Portrait panel: three flags on poles above a skyline that fills
+    # the panel to the bottom edge. (v12's skyline stopped at y+104 and
+    # left a dead flat green block below; the concept itself reads fine.)
+    d.rectangle([x, y, x + w, y + h], fill=(223, 233, 242))
+    # skyline: buildings rise from the bottom edge, varying heights
+    for bx, bw, top in ((x + 2, 20, 78), (x + 26, 18, 58), (x + 48, 24, 88),
+                        (x + 76, 18, 48), (x + 98, 20, 68), (x + 122, 16, 84)):
+        d.rectangle([bx, y + top, bx + bw, y + h], fill=(120, 138, 158))
+        for wy in range(y + top + 6, y + h - 4, 9):
             for wx in range(bx + 5, bx + bw - 4, 10):
                 d.rectangle([wx, wy, wx + 4, wy + 5], fill=(232, 182, 76))
-    d.rectangle([x, y + 104, x + w, y + h], fill=(70, 90, 70))
-    for px, code in ((x + 18, "CN"), (x + 60, "US"), (x + 102, "RU")):
-        d.rectangle([px, y + 14, px + 3, y + 104], fill=(60, 60, 60))
-        fx, fy = px + 3, y + 14
+    # three flags on poles, in front of the skyline
+    for px, code in ((x + 12, "CN"), (x + 56, "US"), (x + 100, "RU")):
+        d.rectangle([px, y + 8, px + 3, y + 72], fill=(60, 60, 60))
+        fx, fy = px + 3, y + 8
         if code == "CN":
-            d.rectangle([fx, fy, fx + 30, fy + 13], fill=(222, 41, 16))
-            for sx, sy in ((fx + 6, fy + 3), (fx + 12, fy + 2), (fx + 10, fy + 6),
-                           (fx + 15, fy + 5), (fx + 12, fy + 9)):
+            d.rectangle([fx, fy, fx + 32, fy + 15], fill=(222, 41, 16))
+            for sx, sy in ((fx + 6, fy + 3), (fx + 13, fy + 2), (fx + 11, fy + 7),
+                           (fx + 17, fy + 6), (fx + 14, fy + 10)):
                 d.ellipse([sx, sy, sx + 3, sy + 3], fill=(255, 222, 0))
         elif code == "US":
-            d.rectangle([fx, fy, fx + 30, fy + 13], fill=(255, 255, 255))
-            for i, yy in enumerate((0, 4, 8)):
-                d.rectangle([fx, fy + yy, fx + 30, fy + yy + 2],
+            d.rectangle([fx, fy, fx + 32, fy + 15], fill=(255, 255, 255))
+            for i, yy in enumerate((0, 5, 10)):
+                d.rectangle([fx, fy + yy, fx + 32, fy + yy + 2],
                             fill=(178, 34, 52))
-            d.rectangle([fx, fy, fx + 13, fy + 7], fill=(60, 59, 110))
-            for sx in range(fx + 2, fx + 12, 4):
-                for sy in range(fy + 1, fy + 6, 3):
+            d.rectangle([fx, fy, fx + 14, fy + 8], fill=(60, 59, 110))
+            for sx in range(fx + 3, fx + 13, 4):
+                for sy in range(fy + 2, fy + 7, 3):
                     d.ellipse([sx, sy, sx + 2, sy + 2], fill=(255, 255, 255))
         else:
-            d.rectangle([fx, fy, fx + 30, fy + 4], fill=(255, 255, 255))
-            d.rectangle([fx, fy + 4, fx + 30, fy + 9], fill=(0, 57, 166))
-            d.rectangle([fx, fy + 9, fx + 30, fy + 13], fill=(213, 0, 50))
+            d.rectangle([fx, fy, fx + 32, fy + 5], fill=(255, 255, 255))
+            d.rectangle([fx, fy + 5, fx + 32, fy + 10], fill=(0, 57, 166))
+            d.rectangle([fx, fy + 10, fx + 32, fy + 15], fill=(213, 0, 50))
 
 
 HERO_DRAW = [draw_bridge, draw_radar, draw_summit]
