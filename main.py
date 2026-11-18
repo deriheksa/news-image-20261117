@@ -120,6 +120,10 @@ HEROES = [
      "in Manila for the Quad."),
 ]
 
+# Kicker accent colour per hero, by category (digest script TXT[col]):
+# heroes 1-2 are war, hero 3 is diplomacy.
+HERO_TINT = [T_WAR, T_WAR, T_DIP]
+
 
 def draw_bridge(d, x, y, w, h):
     d.rectangle([x, y, x + w, y + h], fill=SKY)
@@ -420,7 +424,7 @@ def build():
         d.rectangle([x, hy, x + hw, hy + hh], fill=CARD, outline=BORDER, width=1)
         HERO_DRAW[i](d, x + 1, hy + 1, hw - 2, 60)
         ty = hy + 68
-        text(d, (x + 10, ty), kicker, F_TITLE(12), RED)
+        text(d, (x + 10, ty), kicker, F_TITLE(12), HERO_TINT[i])
         hl, cut = fit_lines(head, F_TITLE(19), hw - 20, 2)
         if cut:
             truncated.append("hero head %d" % (i + 1))
